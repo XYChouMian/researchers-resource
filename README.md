@@ -8,7 +8,7 @@
 
 ### 📚 mkdocs/ai —— 主要文档网站
 
-基于 MkDocs Material 主题构建的中文技术文档网站，网址：http://expfluid.bond/
+基于 MkDocs Material 主题构建的中文技术文档网站，网址：http://expfluid.bond/（仅 tju 校园网可访问）
 
 #### 内容结构
 
