@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文档与参考文献阅读</title>
+
+    <!-- 1. KaTeX 样式与渲染脚本 -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.8/dist/contrib/auto-render.min.js"
+        onload="renderMathInElement(document.body);"></script>
+
+    <!-- 2. 布局与边界箭头按钮 CSS -->
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html, body {
+            height: 100vh;
+            width: 100vw;
+            overflow: hidden;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: #f8fafc;
+        }
+
+        /* 外层 Flex 主容器 */
+        .split-container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+            position: relative;
+        }
+
+        /* 左右面板通用基础设置 */
+        .left-panel, .right-panel {
+            height: 100%;
+            overflow-y: auto;
+            padding: 2.5rem 2rem 2rem 2rem;
+            transition: flex 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* 展开/收起平滑过度 */
+        }
+
+        /* 左侧主文档区：默认占 60% */
+        .left-panel {
+            flex: 6;
+            background-color: #ffffff;
+        }
+
+        /* 右侧参考文献区：默认占 40% */
+        .right-panel {
+            flex: 4;
+            background-color: #f8fafc;
+            border-left: 1px solid #e2e8f0;
+        }
+
+        /* 边界分隔线与悬浮箭头按钮容器 */
+        .divider-container {
+            position: relative;
+            width: 0;
+            z-index: 100;
+        }
+
+        /* 嵌在分隔线中间的微型箭头按钮 */
+        .toggle-arrow-btn {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 20px;
+            height: 48px;
+            background-color: #ffffff;
+            border: 1px solid #cbd5e1;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+            color: #64748b;
+            font-size: 11px;
+            user-select: none;
+            transition: all 0.2s ease;
+        }
+
+        .toggle-arrow-btn:hover {
+            background-color: #2563eb;
+            color: #ffffff;
+            border-color: #2563eb;
+            box-shadow: 0 4px 10px rgba(37, 99, 235, 0.25);
+        }
+
+        /* 折叠状态样式 */
+        .split-container.collapsed .right-panel {
+            display: none;
+        }
+        .split-container.collapsed .left-panel {
+            flex: 12;
+        }
+        /* 折叠后，把边界按钮贴在最右侧 */
+        .split-container.collapsed .divider-container {
+            position: fixed;
+            right: 0;
+            top: 0;
+            height: 100vh;
+        }
+        .split-container.collapsed .toggle-arrow-btn {
+            left: -10px; /* 贴靠右边缘 */
+            border-radius: 10px 0 0 10px;
+        }
+
+        /* 排版美化 */
+        h1, h2, h3 { margin-bottom: 1rem; color: #1e293b; }
+        p { line-height: 1.7; color: #334155; margin-bottom: 1rem; }
+
+        /* 点击角标高亮动画 */
+        :target {
+            animation: highlight 1.5s ease-out;
+            border-radius: 6px;
+        }
+        @keyframes highlight {
+            0% { background-color: rgba(59, 130, 246, 0.3); }
+            100% { background-color: transparent; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="split-container" id="splitContainer">
+        <!-- 左侧区域：主文档 -->
+        <main class="left-panel">
+
+        </main>
+
+        <!-- 中间边界线与折叠箭头 -->
+        <div class="divider-container">
+            <div class="toggle-arrow-btn" onclick="toggleSidebar()" id="arrowBtn" title="折叠/展开参考文献">
+                ▶
+            </div>
+        </div>
+
+        <!-- 右侧区域：参考文献/侧边栏 -->
+        <aside class="right-panel" id="rightPanel">
+
+        </aside>
+    </div>
+
+    <!-- 控制折叠逻辑的 JS 脚本 -->
+    <script>
+        function toggleSidebar() {
+            const container = document.getElementById('splitContainer');
+            const arrowBtn = document.getElementById('arrowBtn');
+
+            container.classList.toggle('collapsed');
+
+            // 展开时箭头指向右 ▶（提示点击可收起）；收起时箭头指向左 ◀（提示点击可展开）
+            if (container.classList.contains('collapsed')) {
+                arrowBtn.textContent = '◀';
+            } else {
+                arrowBtn.textContent = '▶';
+            }
+        }
+    </script>
+</body>
+</html>

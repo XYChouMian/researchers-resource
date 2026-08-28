@@ -1,0 +1,75 @@
+# 1. 网站基础设置
+site_name: 实验技术学习  # 改成你喜欢的名字
+site_author: hzx
+site_url: http://expfluid.bond/  # 以后绑定域名用
+
+# 2. 主题设置 (使用超漂亮的 Material 主题)
+theme:
+  name: material
+  language: zh # 网页语言设为中文
+  features:
+    - navigation.tabs # 顶部导航条
+    - navigation.sections # 侧边栏分组折叠
+    - navigation.top # 回到顶部按钮
+    - search.suggest # 搜索自动补全
+    - search.highlight # 搜索关键词高亮
+  palette:
+    # 日间模式
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal # 主色调（蓝绿色）
+      accent: indigo # 辅助色
+      toggle:
+        icon: material/weather-sunny
+        name: 切换到暗黑模式
+    # 暗黑模式
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: 切换到日间模式
+
+nav:
+  - 首页: index.md
+  - PIV:
+      - 测速技术原理: piv/theory.md
+      - 实验操作手册: piv/operation.md
+      - ceshi: piv/test.md
+  - 热线风速仪:
+      - 原理: hotwire/theory.md
+      - 设备标定与实操: hotwire/operation.md
+      - 实验室的CTA02和CTA04: hotwire/hanghua.md
+      - 热线焊接与探头制作: hotwire/manufacture.md
+      - 热线实验要点: hotwire/manufacture.md
+
+# 3. 插件配置（新增这一节）
+plugins:
+  - search
+  - mermaid2
+
+# 4. 插件与 Markdown 扩展
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.arithmatex:
+      generic: true
+
+# 5. 加载 KaTeX
+extra_javascript:
+  - javascripts/katex.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js
+
+extra_css:
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css

@@ -1,0 +1,137 @@
+# 1. 网站基础设置
+site_name: AI 技术学习 # 改成你喜欢的名字
+site_author: xychoumian
+site_url: http://expfluid.bond/ # 以后绑定域名用
+
+# 2. 主题设置 (使用超漂亮的 Material 主题)
+theme:
+  name: material
+  language: zh # 网页语言设为中文
+  features:
+    - navigation.tabs # 顶部导航条
+    - navigation.sections # 侧边栏分组折叠
+    - navigation.top # 回到顶部按钮
+    - search.suggest # 搜索自动补全
+    - search.highlight # 搜索关键词高亮
+  palette:
+    # 日间模式
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: teal # 主色调（蓝绿色）
+      accent: indigo # 辅助色
+      toggle:
+        icon: material/weather-sunny
+        name: 切换到暗黑模式
+    # 暗黑模式
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: teal
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: 切换到日间模式
+
+nav:
+  - 首页和零基础入门:
+    - 首页:
+      - index.md
+    - 零基础环境准备:
+      - JupyterHub 空间使用指南: part1_basics/1.1_jupyterhub_space.md
+      - 本地环境搭建: part1_basics/1.2_env_build.md
+    - Python 基础:
+      - Python 入门: part1_basics/1.3_start_python.md
+      - NumPy 入门: part1_basics/1.4_start_numpy.md
+      - 面向对象编程简介: part1_basics/1.5_object_oriented.md
+    - Pytorch 基础:
+      - Pytorch 简介: part1_basics/1.6_pytorch_basic.md
+      - Pytorch 入门 - 理解自动微分: part1_basics/pytorch_autograd.md
+      - PyG 介绍: part1_basics/pytorch_geometric.md
+  - 神经网络基石:
+    - 神经网络基石: part2_networks/part2_networks.md
+    - 基本数学原理: part2_networks/2.1_basic_math.md
+    - MLP 和 Pytorch 入门: part2_networks/2.2_mlp_pytorch.md
+    - RNN 介绍: part2_networks/2.3_rnn.md
+    - CNN 介绍: part2_networks/2.4_cnn.md
+    - PINN 简述: part2_networks/2.5_pinn/2.5_pinn.md
+    - PINN 入门教程:
+      - 0 教程介绍: part2_networks/pinn/0/教程简介.md
+      - 1 PINN 需要的基础知识: part2_networks/pinn/1/PINN基础知识.md
+      - 2 为什么科学需要 PDE: part2_networks/pinn/2/为什么科学需要PDE.md
+      - 3 PINN 实现: part2_networks/pinn/3/PINN核心思想.md
+      - 4 PINN 收敛要领: part2_networks/pinn/4/PINN的失败与修复.md
+      - 5 PINN 理论支柱: part2_networks/pinn/5/PINN理论.md
+      - 6 Pytorch 函数逼近: part2_networks/pinn/6/函数逼近.md
+      - 7 PINN 求解热方程: part2_networks/pinn/7/求解热方程.md
+      - 8 PINN 求反问题: part2_networks/pinn/8/反问题.md
+    - 图神经网络:
+      - GNN 介绍: part2_networks/图神经网络/gnn/gnn.md
+      - PyG 介绍: part2_networks/图神经网络/pyg/pyg.md
+      - PyG Transform: part2_networks/图神经网络/pyg/transform.md
+      - PhysicsNeMo: part2_networks/图神经网络/physicsnemo/PhysicsNeMo.md
+  - 优良机制/架构解析:
+    - 优秀文章列举: part3_advance/3.0_featured_blogs/3.0_featured_blogs.md
+    - ResNet 机制解析: part3_advance/3.1_resnet/3.1_resnet.md
+    - FiLM 机制解析: part3_advance/3.2_film/3.2_film.md
+    - RevIN 机制解析: part3_advance/3.3_revin/3.3_revin.md
+    - 门控激活函数: part3_advance/3.4_GLU/3.4_GLU.md
+    - U-Net 模型: part3_advance/3.5_UNet/3.5_UNet.md
+    - Transformer 模型:
+      - Transformer 模型: part3_advance/3.7_transformer/3.7_transformer.md
+      - 多头注意力机制: part3_advance/3.6_MHA/3.6_MHA.md
+  - 文献阅读与分享:
+    - 通用模板: part4_paper_reading/template/template.md
+    - WQX:
+      - 基于 PINN 的粒子图像物理场重建: part4_paper_reading/WQX/ptv_pinns/ptv_pinns.md
+      - 基于分数的生成模型: part4_paper_reading/WQX/score-based-generative-model/score-based-generative-model.md
+      - 生成式预训练模型: part4_paper_reading/WQX/pretrained_generative_model/pretrained_generative_model.md
+      - FlowNet: part4_paper_reading/WQX/FlowNet/FlowNet.md
+      - FlowNet-PIV: part4_paper_reading/WQX/FlowNet-PIV/FlowNet-PIV.md
+      - PhyMPGN：PINN+GNN: part4_paper_reading/WQX/PhyMPGN/PhyMPGN.md
+      - PDEformer-2: part4_paper_reading/WQX/PDEformer-2/PDEformer-2.md
+      - MeshGraphNets: part4_paper_reading/WQX/MeshGraphNets/MeshGraphNets.md
+      - Fengbo：三维PDE算子: part4_paper_reading/WQX/Fengbo/Fengbo.md
+    - QRC:
+      - 分布式 PINN 对稀疏数据的物理场重构: part4_paper_reading/QRC/distributed_pinn/distributed_pinn.md
+      - 基于 LSTM 的 POD 系数重构系统: part4_paper_reading/QRC/pod_lstm/pod_lstm.md
+      - 自适应模型预测温度控制: part4_paper_reading/QRC/MPC-ESO/MPC-ESO.md
+      - 边缘数据中心智能运维: part4_paper_reading/QRC/PIML-MPC/PIML-MPC.md
+      - PINNS-MPC: part4_paper_reading/QRC/PINNS-MPC/pinns-mpc.md
+      - 可迁移 PINN: part4_paper_reading/QRC/可迁移PINN/可迁移PINN.md
+      - PIARN: part4_paper_reading/QRC/PIARN 核心构架/PIARN.md
+  - 综述:
+    - 简介: part5_revierws/简介.md
+    - 物理场中的 GNN: part5_revierws/物理场GNN.html
+    - GNN 离散表示物理场与实验: part5_revierws/GNN离散表示.html
+  - 课题组特色研究:
+    - 强化学习与流体控制: part6_our_research/01_rl_in_fluids.md
+    - 基于图的生成式RNN设计: part6_our_research/02_graph_gen_rnn.md
+
+# 3. 插件配置（新增这一节）
+plugins:
+  - search
+  - mermaid2
+
+# 4. 插件与 Markdown 扩展
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.arithmatex:
+      generic: true
+
+# 5. 加载 KaTeX
+extra_javascript:
+  - javascripts/katex.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js
+
+extra_css:
+  - https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css
