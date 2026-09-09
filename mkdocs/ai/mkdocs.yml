@@ -46,6 +46,7 @@ nav:
       - Pytorch 简介: part1_basics/1.6_pytorch_basic.md
       - Pytorch 入门 - 理解自动微分: part1_basics/pytorch_autograd.md
       - PyG 介绍: part1_basics/pytorch_geometric.md
+      - PhysicsNeMo: part1_basics/PhysicsNeMo.md
   - 神经网络基石:
     - 神经网络基石: part2_networks/part2_networks.md
     - 基本数学原理: part2_networks/2.1_basic_math.md
@@ -67,7 +68,6 @@ nav:
       - GNN 介绍: part2_networks/图神经网络/gnn/gnn.md
       - PyG 介绍: part2_networks/图神经网络/pyg/pyg.md
       - PyG Transform: part2_networks/图神经网络/pyg/transform.md
-      - PhysicsNeMo: part2_networks/图神经网络/physicsnemo/PhysicsNeMo.md
   - 优良机制/架构解析:
     - 优秀文章列举: part3_advance/3.0_featured_blogs/3.0_featured_blogs.md
     - ResNet 机制解析: part3_advance/3.1_resnet/3.1_resnet.md
