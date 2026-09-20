@@ -1,4 +1,5 @@
 """发票管理系统入口：创建应用、注册蓝图、子路径支持与启动。"""
+import logging
 import os
 import secrets
 from datetime import timedelta
@@ -45,20 +46,34 @@ def _load_secret_key():
     return key_file.read_text(encoding="utf-8").strip()
 
 
+def _setup_admin_log():
+    """管理员操作日志落盘 data/admin.log（每行一个 JSON 对象，应用内不可删除）。"""
+    admin_logger = logging.getLogger("fapiao.admin")
+    if admin_logger.handlers:
+        return
+    handler = logging.FileHandler(db.DATA_DIR / "admin.log", encoding="utf-8")
+    handler.setFormatter(logging.Formatter("%(message)s"))
+    admin_logger.addHandler(handler)
+    admin_logger.setLevel(logging.INFO)
+    admin_logger.propagate = False
+
+
 def create_app():
     app = Flask(__name__)
     prefix = os.environ.get("FAPIAO_PREFIX", PREFIX)
     app.secret_key = _load_secret_key()
     app.config.update(
-        MAX_CONTENT_LENGTH=20 * 1024 * 1024,
+        MAX_CONTENT_LENGTH=25 * 1024 * 1024,
         PERMANENT_SESSION_LIFETIME=timedelta(hours=12),
         SESSION_COOKIE_HTTPONLY=True,
         SESSION_COOKIE_SAMESITE="Lax",
+        TEMPLATES_AUTO_RELOAD=True,
     )
     app.register_blueprint(auth_bp)
     app.register_blueprint(records_bp)
     app.register_blueprint(admin_bp)
     app.teardown_appcontext(db.close_db)
+    _setup_admin_log()
 
     @app.get("/")
     def index_page():
@@ -68,9 +83,17 @@ def create_app():
     def user_page():
         return render_template("user.html")
 
+    @app.get("/reimburse")
+    def reimburse_page():
+        return render_template("reimburse.html")
+
     @app.get("/admin")
     def admin_page():
         return render_template("admin.html")
+
+    @app.get("/logs")
+    def logs_page():
+        return render_template("logs.html")
 
     @app.errorhandler(404)
     def not_found(_e):
@@ -78,7 +101,7 @@ def create_app():
 
     @app.errorhandler(413)
     def too_large(_e):
-        return {"error": "上传内容过大（单个发票文件限 10MB）"}, 413
+        return {"error": "上传内容过大（单个发票文件限 20MB）"}, 413
 
     if prefix:
         app.wsgi_app = PrefixMiddleware(app.wsgi_app, prefix)

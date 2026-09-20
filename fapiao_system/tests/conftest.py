@@ -1,5 +1,6 @@
 """测试夹具：临时目录数据库 + 空子路径应用。"""
 import os
+import shutil
 import sys
 import tempfile
 from pathlib import Path
@@ -28,6 +29,8 @@ def client():
         path = Path(str(db.DB_PATH) + suffix)
         if path.exists():
             path.unlink()
+    shutil.rmtree(db.UPLOAD_DIR, ignore_errors=True)
+    (db.DATA_DIR / "admin.log").write_text("", encoding="utf-8")
     db.init_db()
     conn = db.connect()
     conn.execute(

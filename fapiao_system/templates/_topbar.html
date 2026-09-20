@@ -1,0 +1,12 @@
+<header class="topbar">
+  <span class="brand">发票管理系统</span>
+  <nav class="topnav">
+    <a href="user" class="{% if nav_active == 'user' %}active{% endif %}">发票提交</a>
+    <a href="reimburse" class="admin-link {% if nav_active == 'reimburse' %}active{% endif %}">发票报销</a>
+    <a href="admin" class="admin-link {% if nav_active == 'admin' %}active{% endif %}">后台管理</a>
+  </nav>
+  <span class="spacer"></span>
+  <span id="me-info" class="muted"></span>
+  <button id="btn-pass" class="btn">修改密码</button>
+  <button id="btn-logout" class="btn">退出登录</button>
+</header>

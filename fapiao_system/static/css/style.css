@@ -137,6 +137,45 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: -
 .st-pending { background: #fef3c7; color: #b45309; }
 .st-invoiced { background: #dbeafe; color: #1d4ed8; }
 .st-reimbursed { background: #dcfce7; color: #15803d; }
+.st-rejected { background: #fee2e2; color: #b91c1c; }
+.st-processed { background: #ede9fe; color: #6d28d9; }
+.btn-warn { color: #b45309; border-color: #fcd34d; }
+.btn-warn:hover { background: #fffbeb; }
+
+/* ===== 顶栏导航 ===== */
+.topnav { display: flex; gap: 16px; margin-left: 18px; }
+.topnav a { color: var(--muted); padding: 4px 0; }
+.topnav a.active { color: var(--primary); font-weight: 600; border-bottom: 2px solid var(--primary); }
+.admin-link { display: none; }
+body.is-admin .admin-link { display: inline; }
+.note-cell {
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ===== 分页条 ===== */
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 12px;
+  font-size: 13px;
+}
+.pagination .page-size { width: auto; }
+.pagination > .muted { margin-right: auto; }
+textarea {
+  font: inherit;
+  padding: 8px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: #fff;
+  color: var(--text);
+  width: 100%;
+  resize: vertical;
+}
+textarea:focus { outline: 2px solid var(--primary); outline-offset: -1px; border-color: var(--primary); }
 
 /* ===== 弹窗 ===== */
 .modal-overlay {
@@ -150,7 +189,7 @@ input:focus, select:focus { outline: 2px solid var(--primary); outline-offset: -
   padding: 16px;
 }
 .modal { width: 400px; max-width: 100%; max-height: 90vh; overflow-y: auto; }
-.modal-wide { width: 620px; }
+.modal-wide { width: 680px; }
 
 /* ===== 上传弹窗 ===== */
 .upload-total { font-size: 14px; margin-bottom: 10px; }

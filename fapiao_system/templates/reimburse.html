@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+{% from "_filters.html" import status_filter %}
+{% set nav_active = 'reimburse' %}
+{% block title %}发票报销 - 发票管理系统{% endblock %}
+{% block body %}
+{% include "_topbar.html" %}
+<main class="wrap">
+  <section class="card">
+    <div class="card-head">
+      <h2>报销管理</h2>
+      <div class="toolbar">
+        {{ status_filter('status-filter', 'invoiced') }}
+        <button id="btn-export" class="btn">导出选中清单</button>
+        <button id="btn-reimburse" class="btn btn-primary">标记已报销</button>
+        <button id="btn-reject" class="btn btn-warn">驳回</button>
+        <button id="btn-revert" class="btn">恢复未报销</button>
+        <button id="btn-process" class="btn btn-danger">标记已处理</button>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="records-table">
+        <thead>
+          <tr>
+            <th><input type="checkbox" id="check-all" title="全选"></th>
+            <th>学号</th><th>姓名</th><th>商品名</th><th>渠道</th>
+            <th>金额(元)</th><th>付款时间</th><th>付款人</th>
+            <th>状态</th><th>文件数</th><th>查看详情</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p id="records-empty" class="muted hidden">暂无记录</p>
+    <div id="records-pagination" class="pagination"></div>
+  </section>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/reimburse.js') }}"></script>{% endblock %}

@@ -6,6 +6,13 @@ let records = [];
 
 const form = document.getElementById("record-form");
 const noteField = document.getElementById("channel-note-field");
+const recordsFilter = document.getElementById("records-filter");
+const checkedIds = new Set();
+const pager = { page: 1, pageSize: 20 };
+recordsFilter.addEventListener("change", () => {
+  pager.page = 1;
+  loadRecords();
+});
 
 document.getElementById("channel-select").addEventListener("change", (e) => {
   noteField.classList.toggle("hidden", e.target.value !== "other");
@@ -32,6 +39,7 @@ function collectForm(root) {
     product_name: root.product_name.value.trim(),
     channel: root.channel.value,
     channel_note: root.channel_note.value.trim(),
+    remark: root.remark.value.trim(),
     amount: root.amount.value,
     paid_at: root.paid_at.value,
     payer: root.payer.value,
@@ -41,35 +49,97 @@ function collectForm(root) {
 async function loadRecords() {
   const data = await api("api/records");
   records = data.records;
-  document.getElementById("records-empty").classList.toggle("hidden", records.length > 0);
+  const shown = filteredRecords();
+  document.getElementById("records-empty").classList.toggle("hidden", shown.length > 0);
+  const rows = paginate(shown, pager);
   const tbody = document.querySelector("#records-table tbody");
-  tbody.innerHTML = records.map((r) => `
+  tbody.innerHTML = rows.map((r) => `
     <tr>
+      <td><input type="checkbox" class="row-check" data-id="${r.id}" ${checkedIds.has(r.id) ? "checked" : ""}></td>
       <td>${esc(r.product_name)}</td>
       <td>${CHANNEL_TEXT[r.channel]}${r.channel_note ? `（${esc(r.channel_note)}）` : ""}</td>
-      <td class="num">${Number(r.amount).toFixed(2)}</td>
+      <td class="num">${fmtMoney(r.amount)}</td>
       <td>${esc(r.paid_at)}</td>
       <td>${PAYER_TEXT[r.payer]}</td>
       <td><span class="badge ${STATUS_CLASS[r.status]}">${STATUS_TEXT[r.status]}</span></td>
-      <td>${renderInvoiceLinks(r)}</td>
       <td class="actions">${renderActions(r)}</td>
+      <td class="num">${r.invoices.length}</td>
+      <td><button class="btn btn-sm" data-detail="${r.id}">查看详情</button></td>
     </tr>`).join("");
+
+  const checkAll = document.getElementById("check-all");
+  const pageIds = rows.map((r) => r.id);
+  checkAll.checked = pageIds.length > 0 && pageIds.every((id) => checkedIds.has(id));
+  checkAll.indeterminate = !checkAll.checked && pageIds.some((id) => checkedIds.has(id));
+  refreshPagination();
 }
 
-function renderInvoiceLinks(r) {
-  if (!r.invoices.length) return '<span class="muted">未上传</span>';
-  return r.invoices.map((inv) =>
-    `<a href="api/invoices/${inv.id}/download" title="${esc(inv.orig_name)}">[${FILE_TYPE_TEXT[inv.category] ?? "附件"}] ${esc(shortName(inv.orig_name))}</a>`
-  ).join("<br>");
+function filteredRecords() {
+  const allowed = recordsFilter.value ? recordsFilter.value.split(",") : null;
+  return allowed ? records.filter((r) => allowed.includes(r.status)) : records;
 }
 
-function shortName(name, max = 12) {
-  return name.length > max ? name.slice(0, 9) + "…" : name;
-}
+const refreshPagination = () =>
+  renderPagination(document.getElementById("records-pagination"), pager, filteredRecords().length, loadRecords, checkedIds.size);
+
+const statusOf = (id) => records.find((r) => r.id === id)?.status;
+
+document.getElementById("check-all").addEventListener("change", (e) => {
+  paginate(filteredRecords(), pager).forEach((r) => {
+    if (e.target.checked) checkedIds.add(r.id);
+    else checkedIds.delete(r.id);
+  });
+  document.querySelectorAll(".row-check").forEach((cb) => {
+    cb.checked = e.target.checked;
+  });
+  refreshPagination();
+});
+
+document.querySelector("#records-table tbody").addEventListener("change", (e) => {
+  const cb = e.target.closest("input.row-check");
+  if (!cb) return;
+  if (cb.checked) checkedIds.add(Number(cb.dataset.id));
+  else checkedIds.delete(Number(cb.dataset.id));
+  refreshPagination();
+});
+
+const DELETABLE_STATUSES = ["pending", "invoiced", "rejected"];
+
+document.getElementById("btn-batch-delete").addEventListener("click", async () => {
+  const ids = [...checkedIds].filter((id) => DELETABLE_STATUSES.includes(statusOf(id)));
+  if (!ids.length) {
+    toast("选中的记录中没有可删除的记录（已报销/已处理不可删）", false);
+    return;
+  }
+  if (!confirm(`确定删除选中的 ${ids.length} 条记录吗？删除后不可恢复`)) return;
+  try {
+    const { deleted } = await api("api/records/batch-delete", { json: { ids } });
+    toast(`已删除 ${deleted} 条记录`);
+    checkedIds.clear();
+    loadRecords();
+  } catch (err) {
+    toast(err.message, false);
+  }
+});
+
+document.getElementById("btn-export").addEventListener("click", async () => {
+  const ids = [...checkedIds];
+  if (!ids.length) {
+    toast("请先勾选要导出的记录", false);
+    return;
+  }
+  try {
+    await downloadFile(`api/records/export?ids=${ids.join(",")}`, "我的报销材料.zip");
+  } catch (err) {
+    toast(err.message, false);
+  }
+});
 
 function renderActions(r) {
-  if (r.status === "reimbursed") return '<span class="muted">已锁定</span>';
-  const uploadLabel = r.status === "invoiced" ? "补充附件" : "上传发票";
+  if (["reimbursed", "processed"].includes(r.status)) {
+    return '<span class="muted">已锁定</span>';
+  }
+  const uploadLabel = r.status === "pending" ? "上传发票" : "补充附件";
   return [
     `<button class="btn btn-sm" data-act="upload" data-id="${r.id}">${uploadLabel}</button>`,
     `<button class="btn btn-sm" data-act="edit" data-id="${r.id}">编辑</button>`,
@@ -78,6 +148,11 @@ function renderActions(r) {
 }
 
 document.querySelector("#records-table tbody").addEventListener("click", (e) => {
+  const detailBtn = e.target.closest("button[data-detail]");
+  if (detailBtn) {
+    openRecordDetail(Number(detailBtn.dataset.detail)).catch((err) => toast(err.message, false));
+    return;
+  }
   const btn = e.target.closest("button[data-act]");
   if (!btn) return;
   const rec = records.find((r) => r.id === Number(btn.dataset.id));
@@ -102,18 +177,19 @@ function openUploadModal(rec) {
     <div id="upload-count" class="upload-total"></div>
     ${rec.invoices.length ? `
       <table class="data-table upload-table">
-        <thead><tr><th>已上传文件</th><th>类型</th><th></th></tr></thead>
+        <thead><tr><th>已上传文件</th><th>类型</th><th>备注</th><th></th></tr></thead>
         <tbody>
           ${rec.invoices.map((inv) => `
             <tr>
               <td><a href="api/invoices/${inv.id}/download" title="${esc(inv.orig_name)}">${esc(shortName(inv.orig_name, 16))}</a></td>
               <td><span class="badge ${inv.category === "invoice" ? "st-invoiced" : "st-pending"}">${FILE_TYPE_TEXT[inv.category] ?? "附件"}</span></td>
+              <td class="remark-cell">${esc(inv.remark || "")}</td>
               <td><button type="button" class="btn btn-sm btn-danger" data-del-inv="${inv.id}">删除</button></td>
             </tr>`).join("")}
         </tbody>
       </table>` : ''}
     <table class="data-table upload-table">
-      <thead><tr><th>新文件（PDF/JPG/PNG，≤10MB）</th><th>类型</th><th></th></tr></thead>
+      <thead><tr><th>新文件（PDF/JPG/PNG，≤20MB）</th><th>类型</th><th>备注（选填）</th><th></th></tr></thead>
       <tbody id="new-rows"></tbody>
     </table>
     <div class="upload-actions">
@@ -146,6 +222,7 @@ function openUploadModal(rec) {
           <option value="attachment">附件</option>
         </select>
       </td>
+      <td><input name="remark" maxlength="100" placeholder="选填"></td>
       <td><button type="button" class="btn btn-sm btn-danger">移除</button></td>`;
     tr.querySelector("button").addEventListener("click", () => {
       tr.remove();
@@ -199,6 +276,7 @@ function openUploadModal(rec) {
     for (const tr of rows) {
       fd.append("files", tr.querySelector("input[type=file]").files[0]);
       fd.append("categories", tr.querySelector("select").value);
+      fd.append("remarks", tr.querySelector("input[name=remark]").value.trim());
     }
     try {
       await api(`api/records/${rec.id}/invoices`, { method: "POST", body: fd });
@@ -245,6 +323,10 @@ function openEditModal(rec) {
           <label><input type="radio" name="payer" value="tang"> 唐老师</label>
         </div>
       </div>
+      <div class="field">
+        <span class="field-label">备注（选填）</span>
+        <input name="remark" maxlength="200" value="${esc(rec.remark || "")}">
+      </div>
       <button type="submit" class="btn btn-primary">保存</button>
     </form>`);
   const editForm = overlay.querySelector("#edit-form");
@@ -268,7 +350,7 @@ function openEditModal(rec) {
   });
 }
 
-loadMe("user").then((user) => {
+loadMe().then((user) => {
   me = user;
   if (user) loadRecords();
 });

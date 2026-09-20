@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% set nav_active = 'admin' %}
+{% block title %}系统日志 - 发票管理系统{% endblock %}
+{% block body %}
+{% include "_topbar.html" %}
+<main class="wrap">
+  <section class="card">
+    <div class="card-head">
+      <h2>系统日志</h2>
+      <div class="toolbar">
+        <select id="action-filter">
+          <option value="" selected>全部操作</option>
+          <option value="reimburse">标记已报销</option>
+          <option value="reject">驳回</option>
+          <option value="revert">恢复未报销</option>
+          <option value="process">标记已处理</option>
+        </select>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table class="data-table" id="logs-table">
+        <thead>
+          <tr>
+            <th>时间</th><th>操作</th><th>经办人</th><th>学号</th><th>姓名</th>
+            <th>商品名</th><th>金额(元)</th><th>状态变化</th><th>备注</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <p id="logs-empty" class="muted hidden">暂无日志</p>
+    <div id="logs-pagination" class="pagination"></div>
+  </section>
+</main>
+{% endblock %}
+{% block scripts %}<script src="{{ url_for('static', filename='js/logs.js') }}"></script>{% endblock %}

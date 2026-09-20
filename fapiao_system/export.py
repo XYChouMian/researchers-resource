@@ -12,12 +12,12 @@ from openpyxl import Workbook
 ILLEGAL_CHARS_RE = re.compile(r'[\\/:*?"<>|\r\n\t]')
 CHANNEL_TEXT = {"taobao": "淘宝", "jd": "京东", "other": "其他"}
 PAYER_TEXT = {"self": "本人", "tang": "唐老师"}
-STATUS_TEXT = {"pending": "待开票", "invoiced": "已开票", "reimbursed": "已报销"}
+STATUS_TEXT = {"pending": "待开票", "invoiced": "已开票", "reimbursed": "已报销", "rejected": "已驳回", "processed": "已处理"}
 FILE_TYPE_TEXT = {"invoice": "发票", "attachment": "附件"}
 
-SHEET_HEADERS = ["学号", "姓名", "商品名", "购买渠道", "渠道说明", "付款金额(元)",
+SHEET_HEADERS = ["学号", "姓名", "商品名", "购买渠道", "渠道说明", "备注", "付款金额(元)",
                  "付款时间", "付款人", "开票张数", "状态", "文件名"]
-COLUMN_WIDTHS = (12, 10, 30, 10, 18, 12, 18, 10, 10, 10, 40)
+COLUMN_WIDTHS = (12, 10, 30, 10, 18, 20, 12, 18, 10, 10, 10, 40)
 
 
 def sanitize_filename(text, limit=80):
@@ -95,7 +95,8 @@ def _ext_of(inv):
 def _sheet_row(rec, renamed):
     return [
         rec["student_id"], rec["user_name"], rec["product_name"],
-        CHANNEL_TEXT[rec["channel"]], rec["channel_note"], float(rec["amount"]),
+        CHANNEL_TEXT[rec["channel"]], rec["channel_note"], rec.get("remark", ""),
+        float(rec["amount"]),
         rec["paid_at"], PAYER_TEXT[rec["payer"]],
         rec["invoice_count"] or 0, STATUS_TEXT[rec["status"]],
         ";".join(renamed) if renamed else "未开票",
@@ -109,9 +110,9 @@ def _xlsx_bytes(rows):
     ws.append(SHEET_HEADERS)
     for row in rows:
         ws.append(row)
-    for col, width in zip("ABCDEFGHIJK", COLUMN_WIDTHS):
+    for col, width in zip("ABCDEFGHIJKL", COLUMN_WIDTHS):
         ws.column_dimensions[col].width = width
-    for cells in ws.iter_rows(min_row=2, min_col=6, max_col=6):
+    for cells in ws.iter_rows(min_row=2, min_col=7, max_col=7):
         for cell in cells:
             cell.number_format = "0.00"
     buf = io.BytesIO()

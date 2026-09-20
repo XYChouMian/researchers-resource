@@ -1,49 +1,14 @@
 {% extends "base.html" %}
-{% block title %}管理后台 - 发票管理系统{% endblock %}
+{% set nav_active = 'admin' %}
+{% block title %}后台管理 - 发票管理系统{% endblock %}
 {% block body %}
-<header class="topbar">
-  <span class="brand">发票管理系统 · 管理后台</span>
-  <span class="spacer"></span>
-  <span id="me-info" class="muted"></span>
-  <button id="btn-pass" class="btn">修改密码</button>
-  <button id="btn-logout" class="btn">退出登录</button>
-</header>
+{% include "_topbar.html" %}
 <main class="wrap">
-  <section class="card">
-    <div class="card-head">
-      <h2>报销管理</h2>
-      <div class="toolbar">
-        <select id="status-filter">
-          <option value="pending,invoiced" selected>未报销（待开票 + 已开票）</option>
-          <option value="pending">待开票</option>
-          <option value="invoiced">已开票</option>
-          <option value="reimbursed">已报销</option>
-          <option value="">全部</option>
-        </select>
-        <button id="btn-export" class="btn">导出选中清单</button>
-        <button id="btn-reimburse" class="btn btn-primary">标记已报销</button>
-      </div>
-    </div>
-    <div class="table-scroll">
-      <table class="data-table" id="records-table">
-        <thead>
-          <tr>
-            <th><input type="checkbox" id="check-all" title="全选"></th>
-            <th>学号</th><th>姓名</th><th>商品名</th><th>渠道</th>
-            <th>金额(元)</th><th>付款时间</th><th>付款人</th><th>张数</th>
-            <th>状态</th><th>发票</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-    <p id="records-empty" class="muted hidden">暂无记录</p>
-  </section>
-
   <section class="card">
     <div class="card-head">
       <h2>用户管理</h2>
       <form id="user-form" class="toolbar">
+        <a href="logs" class="btn">查看系统日志</a>
         <input name="student_id" placeholder="学号" required pattern="[A-Za-z0-9]{3,20}" title="3~20 位字母或数字">
         <input name="name" placeholder="姓名（可选）">
         <select name="role">

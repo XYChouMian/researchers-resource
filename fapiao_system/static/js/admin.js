@@ -1,89 +1,8 @@
-/* 管理页脚本：报销管理（查看/导出/批量标记已报销）与用户管理。 */
+/* 后台管理页脚本：成员账号管理。 */
 "use strict";
 
 let me = null;
-let records = [];
 let users = [];
-
-const statusFilter = document.getElementById("status-filter");
-statusFilter.addEventListener("change", loadRecords);
-
-async function loadRecords() {
-  const status = statusFilter.value;
-  const data = await api(`api/admin/records${status ? `?status=${status}` : ""}`);
-  records = data.records;
-  document.getElementById("records-empty").classList.toggle("hidden", records.length > 0);
-  const tbody = document.querySelector("#records-table tbody");
-  tbody.innerHTML = records.map((r) => `
-    <tr>
-      <td>${r.status !== "reimbursed" ? `<input type="checkbox" class="row-check" data-id="${r.id}">` : ""}</td>
-      <td>${esc(r.student_id)}</td>
-      <td>${esc(r.user_name)}</td>
-      <td>${esc(r.product_name)}</td>
-      <td>${CHANNEL_TEXT[r.channel]}</td>
-      <td class="num">${Number(r.amount).toFixed(2)}</td>
-      <td>${esc(r.paid_at)}</td>
-      <td>${PAYER_TEXT[r.payer]}</td>
-      <td class="num">${r.invoice_count ?? "—"}</td>
-      <td><span class="badge ${STATUS_CLASS[r.status]}">${STATUS_TEXT[r.status]}</span></td>
-      <td>${renderInvoiceLinks(r)}</td>
-    </tr>`).join("");
-}
-
-function renderInvoiceLinks(r) {
-  if (!r.invoices.length) return '<span class="muted">无</span>';
-  return r.invoices.map((inv) =>
-    `<a href="api/invoices/${inv.id}/download" title="${esc(inv.orig_name)}">查看</a>`
-  ).join("<br>");
-}
-
-document.getElementById("check-all").addEventListener("change", (e) => {
-  document.querySelectorAll(".row-check").forEach((cb) => {
-    cb.checked = e.target.checked;
-  });
-});
-
-document.getElementById("btn-reimburse").addEventListener("click", async () => {
-  const ids = [...document.querySelectorAll(".row-check:checked")].map((cb) => Number(cb.dataset.id));
-  if (!ids.length) {
-    toast("请先勾选要报销的记录", false);
-    return;
-  }
-  if (!confirm(`确定将选中的 ${ids.length} 条记录标记为“已报销”吗？`)) return;
-  try {
-    const { updated } = await api("api/admin/reimburse", { json: { ids } });
-    toast(`已标记 ${updated} 条记录为已报销`);
-    loadRecords();
-  } catch (err) {
-    toast(err.message, false);
-  }
-});
-
-document.getElementById("btn-export").addEventListener("click", async () => {
-  const ids = [...document.querySelectorAll(".row-check:checked")].map((cb) => Number(cb.dataset.id));
-  if (!ids.length) {
-    toast("请先勾选要导出的记录", false);
-    return;
-  }
-  try {
-    const res = await fetch(`api/admin/export?ids=${ids.join(",")}`);
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({}));
-      toast(data.error || `导出失败（${res.status}）`, false);
-      return;
-    }
-    const blob = await res.blob();
-    const disposition = res.headers.get("Content-Disposition") || "";
-    const match = /filename\*=UTF-8''([^;]+)/.exec(disposition);
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = match ? decodeURIComponent(match[1]) : "报销材料.zip";
-    link.click();
-    URL.revokeObjectURL(link.href);
-  } catch (err) {
-    toast(err.message, false);
-  }
-});
 
 async function loadUsers() {
   users = (await api("api/admin/users")).users;
@@ -181,8 +100,5 @@ document.getElementById("user-form").addEventListener("submit", async (e) => {
 
 loadMe("admin").then((user) => {
   me = user;
-  if (user) {
-    loadRecords();
-    loadUsers();
-  }
+  if (user) loadUsers();
 });

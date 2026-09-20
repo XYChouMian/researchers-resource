@@ -1,0 +1,10 @@
+{% macro status_filter(id, default) %}
+<select id="{{ id }}" class="status-filter">
+  <option value="" {% if default == '' %}selected{% endif %}>全部</option>
+  <option value="pending" {% if default == 'pending' %}selected{% endif %}>待开票</option>
+  <option value="invoiced" {% if default == 'invoiced' %}selected{% endif %}>已开票</option>
+  <option value="rejected" {% if default == 'rejected' %}selected{% endif %}>已驳回</option>
+  <option value="reimbursed" {% if default == 'reimbursed' %}selected{% endif %}>已报销</option>
+  <option value="processed" {% if default == 'processed' %}selected{% endif %}>已处理</option>
+</select>
+{% endmacro %}
