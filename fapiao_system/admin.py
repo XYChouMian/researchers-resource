@@ -142,7 +142,8 @@ def list_records():
         params.append(user_id)
     if clauses:
         sql += " WHERE " + " AND ".join(clauses)
-    sql += " ORDER BY r.id DESC"
+    sql += (" ORDER BY r.paid_at DESC, r.product_name ASC, r.amount ASC,"
+            " r.payer ASC, r.channel ASC, r.created_at DESC, r.id DESC")
     rows = db.get_db().execute(sql, params).fetchall()
     return jsonify(records=[record_to_dict(r) for r in rows])
 

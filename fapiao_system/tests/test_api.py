@@ -780,14 +780,17 @@ def test_export_selected_zip(client):
 
     rows = _sheet_rows(entries["报销清单.xlsx"])
     assert len(rows) == 4
-    assert rows[0][5] == "实验室共用耗材"
-    assert not rows[1][5]
-    assert rows[0][-1] == "移液枪枪头_128.50_发票.pdf;移液枪枪头_128.50_附件.jpg"
-    assert rows[1][-1] == "移液枪枪头_128.50_发票(1).pdf"
-    assert rows[2][-1] == "离心管_9.90_发票.pdf"
-    assert rows[2][0] == "2023456"
-    assert rows[3][10] == "待开票"
-    assert rows[3][-1] == "未开票"
+    # “文件名”列在本测试内唯一，按其查找行，避免依赖固定排序
+    by_files = {r[-1]: r for r in rows}
+    row_a = by_files["移液枪枪头_128.50_发票.pdf;移液枪枪头_128.50_附件.jpg"]
+    row_b = by_files["移液枪枪头_128.50_发票(1).pdf"]
+    row_c = by_files["离心管_9.90_发票.pdf"]
+    row_d = by_files["未开票"]
+    assert row_a[0] == "2023123"
+    assert row_a[5] == "实验室共用耗材"
+    assert not row_b[5]
+    assert row_c[0] == "2023456"
+    assert row_d[10] == "待开票"
 
 
 def test_record_remark(client):
@@ -1159,3 +1162,50 @@ def test_logs_limit_1000(client):
     entries = client.get("/api/admin/logs").get_json()["entries"]
     assert len(entries) == 1000
     assert entries[0]["n"] == 1099
+
+
+def test_records_sorted_by_paid_at_desc(client):
+    make_user(client)
+    login(client, "2023123", "2023123")
+    # 故意按非时间顺序创建，付款时间乱序
+    r1 = create_record(client, product_name="三月", paid_at="2026-03-05").get_json()["record"]["id"]
+    r2 = create_record(client, product_name="一月", paid_at="2026-01-10").get_json()["record"]["id"]
+    r3 = create_record(client, product_name="二月", paid_at="2026-02-20").get_json()["record"]["id"]
+
+    order = [r["id"] for r in client.get("/api/records").get_json()["records"]]
+    assert order == [r1, r3, r2]
+
+    login(client, ADMIN_ID, ADMIN_PASSWORD)
+    admin_order = [r["id"] for r in client.get("/api/admin/records").get_json()["records"]]
+    assert admin_order == [r1, r3, r2]
+
+
+def test_records_secondary_sort_same_day(client):
+    """同付款时间的多条：按商品名升序，再按金额升序。"""
+    make_user(client)
+    login(client, "2023123", "2023123")
+    create_record(client, product_name="bb", amount="30", paid_at="2026-05-01")
+    create_record(client, product_name="aa", amount="10", paid_at="2026-05-01")
+    create_record(client, product_name="aa", amount="20", paid_at="2026-05-01")
+
+    rows = client.get("/api/records").get_json()["records"]
+    got = [(r["product_name"], float(r["amount"])) for r in rows]
+    assert got == [("aa", 10), ("aa", 20), ("bb", 30)]
+
+
+def test_export_order_reversed_against_table(client):
+    """导出清单顺序与表格完全反向：付款时间正序（旧→新）。"""
+    make_user(client)
+    login(client, "2023123", "2023123")
+    r1 = create_record(client, product_name="三月", paid_at="2026-03-05").get_json()["record"]["id"]
+    r2 = create_record(client, product_name="一月", paid_at="2026-01-10").get_json()["record"]["id"]
+    r3 = create_record(client, product_name="二月", paid_at="2026-02-20").get_json()["record"]["id"]
+
+    table_order = [r["id"] for r in client.get("/api/records").get_json()["records"]]
+    assert table_order == [r1, r3, r2]
+
+    login(client, ADMIN_ID, ADMIN_PASSWORD)
+    resp = _export(client, [r1, r2, r3])
+    rows = _sheet_rows(_zip_entries(resp.data)["报销清单.xlsx"])
+    export_order = [r[2] for r in rows]
+    assert export_order == ["一月", "二月", "三月"]

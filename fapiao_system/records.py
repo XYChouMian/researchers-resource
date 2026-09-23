@@ -122,7 +122,8 @@ def load_export_records(ids, user_id=None):
     if user_id is not None:
         sql += " AND r.user_id = ?"
         params.append(user_id)
-    sql += " ORDER BY u.student_id, u.name, r.id"
+    sql += (" ORDER BY r.paid_at ASC, r.product_name DESC, r.amount DESC,"
+            " r.payer DESC, r.channel DESC, r.created_at ASC, r.id ASC")
     rows = db.get_db().execute(sql, params).fetchall()
     invoices = db.get_db().execute(
         f"""SELECT i.record_id, i.orig_name, i.stored_name, i.category
@@ -149,7 +150,10 @@ def load_export_records(ids, user_id=None):
 @login_required
 def list_my_records():
     rows = db.get_db().execute(
-        "SELECT * FROM records WHERE user_id=? ORDER BY id DESC", (g.user["id"],)
+        "SELECT * FROM records WHERE user_id=?"
+        " ORDER BY paid_at DESC, product_name ASC, amount ASC, payer ASC,"
+        " channel ASC, created_at DESC, id DESC",
+        (g.user["id"],),
     ).fetchall()
     return jsonify(records=[record_to_dict(r) for r in rows])
 

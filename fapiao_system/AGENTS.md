@@ -102,12 +102,12 @@ fapiao_system/
 | POST | /api/logout | 匿名 | 清除会话 |
 | GET | /api/me | 登录 | 当前用户 |
 | POST | /api/password | 登录 | `{old_password, new_password}` ≥6位 |
-| GET | /api/records | 登录 | 本人全部记录（含 invoices 列表） |
+| GET | /api/records | 登录 | 本人全部记录（含 invoices 列表）；排序：付款时间倒序→商品名→价格→付款人→渠道升序→创建时间倒序→id |
 | POST | /api/records | 登录 | 新建记录（校验见 records.parse_record_payload） |
 | PUT | /api/records/\<id\> | 本人 | `pending`/`invoiced` 可改；`reimbursed` 拒绝 |
 | DELETE | /api/records/\<id\> | 本人 | `pending`/`invoiced` 可删，磁盘文件一并清理；`reimbursed` 拒绝 |
 | POST | /api/records/batch-delete | 本人 | `{ids:[...]}` 批量删除本人可删记录（待开票/已开票/已驳回；终态跳过），返回 `{deleted}` |
-| GET | /api/records/export?ids= | 本人 | 导出本人选中记录的报销材料包 zip（与管理员导出同格式） |
+| GET | /api/records/export?ids= | 本人 | 导出本人选中记录的报销材料包 zip（与管理员导出同格式）；清单行序与表格完全反向（付款时间正序、次级键降序、创建时间升序） |
 | POST | /api/records/\<id\>/invoices | 本人 | multipart：`files`多文件 + `categories`逐文件 invoice\|attachment + `remarks`逐文件选填备注(≤100字)；`pending`/`invoiced` 可传；张数与状态自动重算 |
 | DELETE | /api/invoices/\<id\> | 本人或管理员 | 删除单个文件；记录未报销才允许；发票删光自动回到待开票 |
 | GET | /api/invoices/\<id\>/download | 本人或管理员 | 附件下载；`?inline=1` 为浏览器内嵌预览（图片自动转 PDF，转换失败回退原图） |
@@ -116,7 +116,7 @@ fapiao_system/
 | PUT | /api/admin/users/\<id\> | 管理员 | 改 name/role；不能改自己的角色 |
 | POST | /api/admin/users/\<id\>/reset_password | 管理员 | 重置为学号 |
 | DELETE | /api/admin/users/\<id\> | 管理员 | 不能删自己；名下有记录则拒绝（保护数据） |
-| GET | /api/admin/records?status=a,b&user_id= | 管理员 | 全部记录（含学号/姓名） |
+| GET | /api/admin/records?status=a,b&user_id= | 管理员 | 全部记录（含学号/姓名）；排序规则同 /api/records |
 | GET | /api/records/\<id\>/detail | 本人或管理员 | 记录详情：记录 + 发票列表 + 操作历史（审计） |
 | GET | /api/admin/export?ids=1,2,3 | 管理员 | 导出选中记录的报销材料包 zip：根目录\`报销清单.xlsx\`（含“备注”列与“文件名”列，分号分隔）+ 按姓名分文件夹（重名加(2)）+ \`商品名_金额_发票/附件.扩展名\`（冲突加(1)）；待开票记录只进表格、文件名列标“未开票”；磁盘缺失文件标“（文件缺失）” |
 | POST | /api/admin/reimburse | 管理员 | `{ids:[...]}` 批量标记已报销（仅已开票生效），返回 `{updated}` |
